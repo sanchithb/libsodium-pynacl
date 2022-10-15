@@ -67,9 +67,39 @@ class MyServer(BaseHTTPRequestHandler):
 
             sealed_box = SealedBox(public_key)
 
-            message = b"Give 10 days Diwali Holiday"
+            # Some Random JSON Data
+            # Alternatively instead of this we can load a JSON file
+            #
+            # message_json = message.json()
+            # with open (message_json, 'r') as f:
+            #   message = json.load(f)
+            message = {
+                            "glossary": {
+                                "title": "example glossary",
+                                "GlossDiv": {
+                                    "title": "S",
+                                    "GlossList": {
+                                        "GlossEntry": {
+                                            "ID": "SGML",
+                                            "SortAs": "SGML",
+                                            "GlossTerm": "Standard Generalized Markup Language",
+                                            "Acronym": "SGML",
+                                            "Abbrev": "ISO 8879:1986",
+                                            "GlossDef": {
+                                                "para": "A meta-markup language, used to create markup languages such as DocBook.",
+                                                "GlossSeeAlso": ["GML", "XML"]
+                                            },
+                                            "GlossSee": "markup"
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
-            encrypted = sealed_box.encrypt(message)
+            # Convert the JSON data to bytes
+            message_bytes = json.dumps(message).encode()
+
+            encrypted = sealed_box.encrypt(message_bytes)
 
             # encrypted is of type bytes and it is not JSON Serializable
             # We convert it to string and send it
