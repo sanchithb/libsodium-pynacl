@@ -1,29 +1,44 @@
-import requests
+# pip install pynacl
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import base64
-import nacl.utils
-from nacl.public import PrivateKey, SealedBox
+from nacl.public import SealedBox
+import pickle
+
+# Server Initiation
 
 hostName = "localhost"
 serverPort = 8080
 
 class MyServer(BaseHTTPRequestHandler):
+
+# GET Request Handler
+
     def do_GET(self):
+
+        # Send response status code 200 (OK)
         self.send_response(200)
+
+        # Send headers, We are sending the json data
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        print(self.headers)
 
+        # url path
         if self.path == '/':
+            
             self.wfile.write(bytes("Home", "utf-8"))
 
         elif self.path == '/encode':
+
+            # Initialize a file where headers are dumped
 
             head = open(r"head.txt","w+")
             head.write(str(self.headers))
             head.close()
             
+            # Read the headers from the file and extract the key
+
             read_head = open('head.txt')
             content = read_head.readlines(0-6)
             cont = content[2]
@@ -36,32 +51,42 @@ class MyServer(BaseHTTPRequestHandler):
             keys.close()
             read_head.close()
 
-            base64_string = final[1]
-            base64_bytes = base64_string.encode("ascii")
-            
-            sample_string_bytes = base64.b64decode(base64_bytes)
-            sample_string = sample_string_bytes.decode("ascii")
-            print(f"Decoded string: {sample_string}")
+            # Assign a variable to the key
 
-            sealed_box = SealedBox(sample_string)
+            str_p_public_key = final[1]
+
+            # Decode it from base64
+
+            b64_p_public_key = base64.b64decode(str_p_public_key)
+
+            # Unpickle it
+
+            public_key = pickle.loads(b64_p_public_key)
+
+            # Create a SealedBox object
+
+            sealed_box = SealedBox(public_key)
 
             message = b"Give 10 days Diwali Holiday"
 
             encrypted = sealed_box.encrypt(message)
+
+            # encrypted is of type bytes and it is not JSON Serializable
+            # We convert it to string and send it
+
+            b64_encrypted = base64.b64encode(encrypted)
+
+            str_encrypted = b64_encrypted.decode("utf-8")
+
             sample_dataset = {
                 "results":[
                     {
-                        "Encrypted Data": [encrypted]
+                        "Encrypted Data": [str_encrypted]
                     }
                 ]
             }
 
             self.wfile.write(json.dumps({"kind": "HPKE", "JSON": [sample_dataset]}).encode("utf-8"))
-
-        elif self.path == '/decode':
-            response = requests.head(self.path)
-            print(response.headers["key"])
-            self.wfile.write(response.headers["key"])
 
 
 if __name__ == "__main__":        
