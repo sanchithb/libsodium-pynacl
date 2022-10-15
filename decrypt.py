@@ -34,12 +34,12 @@ bytes_encrypted_data = base64.b64decode(encrypted_data)
 unseal_box = SealedBox(private_key)
 
 # Decrypt the message by unsealed_box.decrypt()
-decrypted_data = unseal_box.decrypt(bytes_encrypted_data)
+bytes_decrypted_data = unseal_box.decrypt(bytes_encrypted_data)
 
-# Print the decrypted message
-print(decrypted_data)
+
+# Decode to JSON format
+decrypted_data = json.loads(bytes_decrypted_data.decode('utf-8'))
 
 # Write the decrypted message to a file
-msg = open(r"Decrypted Data.txt","w")
-msg.write(str(decrypted_data))
-msg.close()
+with open("decrypted_data.json", "w") as outfile:
+    json.dump(decrypted_data, outfile)
