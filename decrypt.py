@@ -2,17 +2,16 @@
 
 import json
 import base64
-from nacl.public import SealedBox
-import pickle
+from nacl.public import SealedBox, PrivateKey
 
 # Open the privatekey.key file and read the key
-str_p_private_key = open('privatekey.key', 'r').read()
+str_b_private_key = open('privatekey.key', 'r').read()
 
 # Decode the key from base64
-b64_p_private_key = base64.b64decode(str_p_private_key)
+b64_b_private_key = base64.urlsafe_b64decode(str_b_private_key)
 
-# Unpickle the key
-private_key = pickle.loads(b64_p_private_key)
+# Recreate the object from the bytes
+private_key = PrivateKey(b64_b_private_key)
 
 # Open the .json file which you got the data from the server
 # Rename the file to result.json
@@ -28,7 +27,7 @@ with open (result_json, 'r') as f:
 encrypted_data = response["JSON"][0]["results"][0]["Encrypted Data"][0]
 
 # Decode the encrypted message from base64
-bytes_encrypted_data = base64.b64decode(encrypted_data)
+bytes_encrypted_data = base64.urlsafe_b64decode(encrypted_data)
 
 # Create a SealedBox object using Private Key
 unseal_box = SealedBox(private_key)
