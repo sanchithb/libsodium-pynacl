@@ -2,7 +2,6 @@
 
 import base64
 from nacl.public import PrivateKey
-import pickle
 
 # =========================================================================== #
 # ======================== GENERATION OF PRIVATE KEY ======================== #
@@ -12,22 +11,22 @@ import pickle
 private_key = PrivateKey.generate()
 print("Private Key: \n",private_key)
 
-# Pickle the private key
+# Extract the bytes from the private key object
 
-p_private_key = pickle.dumps(private_key)
+b_private_key = PrivateKey.__bytes__(private_key)
 
 # Encode the private key to base64
 
-b64_p_private_key = base64.b64encode(p_private_key)
+b64_b_private_key = base64.urlsafe_b64encode(b_private_key)
 
 # Convert the encoded private key to string to send over http
 # allthough this method is skipable for private key as we are not transferring
 
-str_p_private_key = b64_p_private_key.decode("utf-8")
+str_b_private_key = b64_b_private_key.decode("utf-8")
 
 # Method to write the .key file
 prk = open(r"privatekey.key","w")
-prk.write(str_p_private_key)
+prk.write(str_b_private_key)
 prk.close()
 
 # =========================================================================== #
@@ -40,21 +39,21 @@ prk.close()
 public_key = private_key.public_key
 print("Public Key: \n",public_key)
 
-# Pickle the public key
+# Extract the bytes from the private key object
 
-p_public_key = pickle.dumps(public_key)
+b_public_key = private_key.public_key.__bytes__()
 
 # Encode the public key to base64
 
-b64_p_public_key = base64.b64encode(p_public_key)
+b64_b_public_key = base64.b64encode(b_public_key)
 
 # Convert the encoded public key to string to send over http
 
-str_p_public_key = b64_p_public_key.decode("utf-8")
+str_b_public_key = b64_b_public_key.decode("utf-8")
 
 # Method to write the .key file
 puk = open(r"publickey.key","w")
-puk.write(str_p_public_key)
+puk.write(str_b_public_key)
 puk.close()
 
 # ========================================================================= #
